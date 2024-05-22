@@ -76,9 +76,39 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
+        #move the snake
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_LEFT:
+                snake_dx = -1*SNAKE_SIZE
+                snake_dy =0
+            if event.key == pygame.K_RIGHT:
+                snake_dx = SNAKE_SIZE
+                snake_dy = 0
+            if event.key == pygame.K_DOWN:
+                snake_dx = 0
+                snake_dy = SNAKE_SIZE
+            if event.key == pygame.K_UP:
+                snake_dx = 0
+                snake_dy = -1*SNAKE_SIZE
     #Get a list of all keys currently being pressed down
     #keys = pygame.key.get_pressed()   
     
+    #update the x y position of the snake head
+    head_x += snake_dx
+    head_y += snake_dy
+    head_coord = (head_x, head_y, SNAKE_SIZE, SNAKE_SIZE)         
+
+    #check for collisions
+    if head_rect.colliderect(apple_rect):
+        score += 1
+        pick_up_sound.play()
+
+        apple_x = random.randint(0, WINDOW_WIDTH - SNAKE_SIZE)
+        apple_y = random.randint(0, WINDOW_HEIGHT - SNAKE_SIZE)        
+        apple_coord = (apple_x, apple_y, SNAKE_SIZE, SNAKE_SIZE)
+
+    #update HUD
+    score_text = font.render('Score: ' + str(score), True, GREEN, DARKRED)
 
     #Move the dragon continously
     #if (keys[pygame.K_LEFT] or keys[pygame.K_a]) and dragon_rect.left > 0:
@@ -90,54 +120,6 @@ while running:
     #if keys[pygame.K_DOWN] and player_rect.bottom < WINDOW_HEIGHT:
     #    player_rect.y += PLAYER_VELOCITY
 
-    #Move the coin
-            '''
-    if coin_rect.x < 0:
-        #player missed coin
-        player_lives -= 1
-        miss_sound.play()
-        #place coin off the end of the screen again
-        coin_rect.x = WINDOW_WIDTH + BUFFER_DISTANCE
-        coin_rect.y = random.randint(64, WINDOW_HEIGHT - 32)
-    else:
-        coin_rect.x -= coin_velocity
-        #move hte coint
-    #Check for collison between player and coin
-    if player_rect.colliderect(coin_rect):
-        score += 1
-        coin_sound.play()
-        coin_velocity += COIN_ACCELERATION
-        coin_rect.x = WINDOW_WIDTH + BUFFER_DISTANCE
-        coin_rect.y = random.randint(64, WINDOW_HEIGHT - 32)
-
-    #update HUD
-    score_text = font.render('Score: ' + str(score), True, GREEN, DARKGREEN)
-    lives_text = font.render('Lives: ' + str(player_lives), True, GREEN, DARKGREEN)
-
-
-    if player_lives == 0:
-        display_surface.blit(game_over_text, game_over_rect)
-        display_surface.blit(continue_text, continue_rect)
-        pygame.display.update()
-
-        #Pause game until player presses a key, then reset
-        pygame.mixer.music.stop()
-        is_paused = True
-        while is_paused:
-            for event in pygame.event.get():
-                #player wants to play again
-                if event.type == pygame.KEYDOWN:
-                    score = 0
-                    player_lives = PLAYER_STARTING_LIVES
-                    player_rect.y = WINDOW_HEIGHT // 2
-                    coin_velocity = COIN_STARTING_VELOCITY
-                    pygame.mixer.music.play(-1, 0.0)
-                    is_paused = False
-                #player wants to quit
-                if event.type == pygame.QUIT:
-                    is_paused = False
-                    running = False
-    '''
 
     #Fill the display surface to cover old images
     display_surface.fill(WHITE)
@@ -154,8 +136,8 @@ while running:
     #Still need to do the body
 
 
-    pygame.draw.rect(display_surface, RED, apple_coord)
-    pygame.draw.rect(display_surface, GREEN, head_coord)
+    head_rect = pygame.draw.rect(display_surface, RED, apple_coord)
+    apple_rect = pygame.draw.rect(display_surface, GREEN, head_coord)
 
 
     #update display
