@@ -93,10 +93,42 @@ while running:
     #Get a list of all keys currently being pressed down
     #keys = pygame.key.get_pressed()   
     
+    #add the head coordinate to the first index of the body coordinate list
+    body_coords.insert(0, head_coord)
+    body_coords.pop()
+
     #update the x y position of the snake head
     head_x += snake_dx
     head_y += snake_dy
     head_coord = (head_x, head_y, SNAKE_SIZE, SNAKE_SIZE)         
+
+    #check for game over
+    #print(head_rect.left, head_rect.right, head_rect.top, head_rect.bottom)
+    if head_rect.left < 0 or head_rect.right > WINDOW_WIDTH or head_rect.top < 0 or head_rect.bottom > WINDOW_HEIGHT or head_coord in body_coords:
+        display_surface.blit(game_over_text, game_over_rect)
+        display_surface.blit(continue_text, continue_rect)
+        pygame.display.update()
+
+
+        #Pause the game until the player presses a key, then reset the game
+        is_paused = True
+        while is_paused:
+            for event in pygame.event.get():
+                #The player wants to play again
+                if event.type == pygame.KEYDOWN:
+                    score = 0
+
+                    head_x = WINDOW_WIDTH//2
+                    head_y = WINDOW_HEIGHT // 2 + 100
+                    head_coord = (head_x, head_y, SNAKE_SIZE, SNAKE_SIZE)
+                    body_coords = []
+                    snake_dx = 0
+                    snake_dy = 0
+                    is_paused = False
+                #The player wants to quit
+                if event.type == pygame.QUIT:
+                    is_paused = False
+                    running = False    
 
     #check for collisions
     if head_rect.colliderect(apple_rect):
@@ -106,6 +138,9 @@ while running:
         apple_x = random.randint(0, WINDOW_WIDTH - SNAKE_SIZE)
         apple_y = random.randint(0, WINDOW_HEIGHT - SNAKE_SIZE)        
         apple_coord = (apple_x, apple_y, SNAKE_SIZE, SNAKE_SIZE)
+
+        body_coords.append(head_coord)
+
 
     #update HUD
     score_text = font.render('Score: ' + str(score), True, GREEN, DARKRED)
@@ -135,9 +170,10 @@ while running:
     #Blit (copy) assets to the screen
     #Still need to do the body
 
-
-    head_rect = pygame.draw.rect(display_surface, RED, apple_coord)
-    apple_rect = pygame.draw.rect(display_surface, GREEN, head_coord)
+    for body in body_coords:
+        pygame.draw.rect(display_surface, DARKGREEN, body)
+    apple_rect = pygame.draw.rect(display_surface, RED, apple_coord)
+    head_rect = pygame.draw.rect(display_surface, GREEN, head_coord)
 
 
     #update display
